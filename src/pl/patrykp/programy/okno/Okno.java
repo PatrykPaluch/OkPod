@@ -5,6 +5,7 @@ import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -19,11 +20,13 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -31,11 +34,24 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 public class Okno implements MouseMotionListener, MouseListener {
-
+	
+	private static final ImageIcon dii;
 	private JPopupMenu popupMenu;
 	private JFrame o;
 	private MouseDelta md = new MouseDelta();
 	private JLabel tlo;
+	
+	static {
+		dii = initStaticFinalImageIconVariable();
+	}
+	private static ImageIcon initStaticFinalImageIconVariable(){
+		try {
+			return new ImageIcon(ImageIO.read(new File("empty.png")));
+		} catch (IOException er) {
+			System.err.println("Brak domyslnej ikony");
+			return  null;
+		}
+	}
 	
 	public Okno(){
 		
@@ -46,7 +62,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 		o.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
-				AppManager.getInstance().zabij(0);
+				stop();
 			}
 		});
 		o.setSize(100, 100);
@@ -61,7 +77,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 		o.getContentPane().addMouseMotionListener(this);
 		o.getContentPane().addMouseListener(this);
 		
-		tlo = new JLabel();
+		tlo = new JLabel(dii);
 		o.getContentPane().add(tlo, BorderLayout.CENTER);
 		
 		
@@ -77,24 +93,30 @@ public class Okno implements MouseMotionListener, MouseListener {
 		//o.add(menu);
 		//Buttony
 		JMenuItem open = new JMenuItem("Otworz");
-		JMenuItem openNext = new JMenuItem("Dodaj slajd");
-		JMenuItem prevSlide = new JMenuItem("Poprzedni slajd");
-		JMenuItem nextSlide = new JMenuItem("Nastepny slajd");
+		JMenuItem resize = new JMenuItem("Zmien rozmiar");
+		JMenuItem resizeVal = new JMenuItem("ustaw rozmiar");
+		JMenuItem setPos = new JMenuItem("Ustaw pozycje");
+//		JMenuItem openNext = new JMenuItem("Dodaj slajd");
+//		JMenuItem prevSlide = new JMenuItem("Poprzedni slajd");
+//		JMenuItem nextSlide = new JMenuItem("Nastepny slajd");
 		JMenuItem close = new JMenuItem("Zamknij to okno");
-		JMenuItem exit = new JMenuItem("Wyjscie");
 		
 		//Dodawanie do menu
 		menu.add(open);
-		menu.add(openNext);
 		menu.addSeparator();
-		menu.add(prevSlide);
-		menu.add(nextSlide);
+		menu.add(resize);
+		menu.add(resizeVal);
+		menu.add(setPos);
+//		menu.add(openNext);
+//		menu.addSeparator();
+//		menu.add(prevSlide);
+//		menu.add(nextSlide);
 		menu.addSeparator();
 		menu.add(close);
-		menu.addSeparator();
-		menu.add(exit);
 		
 		//Eventy
+		close.addActionListener((e)->stop());
+		resizeVal.addActionListener((e)->showPosMenu() );
 		
 		//TODO eventy
 		
@@ -102,6 +124,34 @@ public class Okno implements MouseMotionListener, MouseListener {
 		this.popupMenu = menu;
 	}
 	
+	void showPosMenu(){
+		JDialog d = new JDialog();
+		d.getContentPane().setLayout(new GridLayout(2, 2));
+		JLabel xL = new JLabel("X:");
+		JLabel yL = new JLabel("Y:");
+		JFormattedTextField x = new JFormattedTextField(NumberFormat.getInstance());
+		JFormattedTextField y = new JFormattedTextField(NumberFormat.getInstance());
+		d.getContentPane().add(xL);
+		d.getContentPane().add(x);
+		d.getContentPane().add(yL);
+		d.getContentPane().add(y);
+		d.setSize(150, 100);
+		d.setLocationRelativeTo(null);
+		d.setVisible(true);
+	}
+	
+	public void stop(){
+		AppManager.getInstance().destroyWindow(this);
+	}
+	
+	void _destroy(){
+		if(o==null) return;
+		o.dispose();
+		o = null;
+		md = null;
+		tlo = null;
+		popupMenu = null;
+	}
 	
 	public void start(){
 		try{
@@ -112,8 +162,9 @@ public class Okno implements MouseMotionListener, MouseListener {
 			
 			Image img = icon.getScaledInstance(tlo.getWidth(), tlo.getHeight(), BufferedImage.SCALE_SMOOTH);
 			tlo.setIcon(new ImageIcon(img));
-		}catch (IOException er) {
-			
+		}catch (IOException | IllegalArgumentException er) {
+			System.err.println("Blad ladowania domyslnego pliku");
+			er.printStackTrace();
 		}
 	}
 
@@ -121,7 +172,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 	public void mouseDragged(MouseEvent e) {
 		if(SwingUtilities.isLeftMouseButton(e)){
 			md.updateMove(e);
-			md.setPosOnScrean(o);//TODO dziwne przesuniecie
+			md.setPosOnScrean(o);
 		}
 	}
 
@@ -159,5 +210,9 @@ public class Okno implements MouseMotionListener, MouseListener {
 	public void mouseReleased(MouseEvent e) {
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		return this == obj;
+	}
 	
 }

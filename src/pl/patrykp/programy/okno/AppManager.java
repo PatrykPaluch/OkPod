@@ -7,6 +7,7 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.imageio.ImageIO;
@@ -16,7 +17,10 @@ import javax.swing.JOptionPane;
 public class AppManager {
 
 	private static final AppManager instance; 
-
+	
+	private ArrayList<Okno> okna = new ArrayList<Okno>();
+	
+	
 	private TrayIcon tIc;
 	
 	static {
@@ -32,7 +36,7 @@ public class AppManager {
 	
 	private void initNoTray(){
 		//TODO: zrobic init dla systemow nie wspierajacych try
-		JOptionPane.showMessageDialog(null, "Masz problem, twoj komp nie wspiera Tray (lub wystapil inny blad inicjalizacji - z twojej winy, trza bylo sie nie bawic plikami programu).", "Blad Tray", JOptionPane.ERROR_MESSAGE );
+		JOptionPane.showMessageDialog(null, "System nie wspiera Tray.", "Blad Tray", JOptionPane.ERROR_MESSAGE );
 		System.exit(-1);
 	}
 	
@@ -69,26 +73,44 @@ public class AppManager {
 		
 		//Buttony
 		MenuItem wyjscie = new MenuItem("Zamknij");
-		
+		MenuItem addNew = new MenuItem("Nowe okno");
 		
 		//Dodawanie do menu
 		menu.add(wyjscie);
+		menu.add(addNew);
 		
 		//Eventy
 		wyjscie.addActionListener((e)->zabij(0));
-		
+		addNew.addActionListener((e)->createWindow() );
 		//Ustawienie menusa
 		tIc.setPopupMenu(menu);
 		tIc.setToolTip("Okno ");
 	}
 	
 	public void zabij(int err){
+		Okno[] oknaToDestroy = okna.toArray(new Okno[okna.size()]);
+		for(Okno o : oknaToDestroy) destroyWindow(o);
+		oknaToDestroy = null;
+		
 		SystemTray.getSystemTray().remove(tIc);
 		System.exit(err);
+	}
+	
+	
+	public void destroyWindow(Okno ok){
+		ok._destroy();
+		okna.remove(ok);
+	}
+	
+	public void createWindow(){
+		Okno ok = new Okno();
+		ok.start();
+		okna.add(ok);
 	}
 	
 	public static AppManager getInstance(){
 		return instance;
 	}
+	
 	
 }
