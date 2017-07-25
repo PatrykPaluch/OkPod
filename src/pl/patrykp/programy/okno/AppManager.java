@@ -1,18 +1,23 @@
 package pl.patrykp.programy.okno;
 
 import java.awt.AWTException;
+import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.imageio.ImageIO;
+import javax.rmi.CORBA.Util;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+
+import pl.patrykp.programy.okno.utils.Utils;
 
 public class AppManager {
 
@@ -49,14 +54,11 @@ public class AppManager {
 		}
 		SystemTray tra = SystemTray.getSystemTray();
 		
-		try {
-			tIc = new TrayIcon(ImageIO.read(new File("plik.jpg")));
-		}catch(IOException er){
-			System.err.println("Blad ladowania trayIcon");
-			er.printStackTrace();
-			System.out.println("Laduje ustawienia bez systemowego tray");
-			initNoTray();
-			return;
+		
+		tIc =  new TrayIcon(Utils.defaultTexture);
+		int width = tIc.getSize().width;
+		if(Utils.defaultTexture.getWidth(null)!=width || Utils.defaultTexture.getHeight(null) != width){
+			tIc = new TrayIcon(Utils.defaultTexture.getScaledInstance(width, width, BufferedImage.SCALE_SMOOTH));
 		}
 		
 		try{
@@ -72,30 +74,40 @@ public class AppManager {
 		PopupMenu menu = new PopupMenu();
 		
 		//Buttony
-		MenuItem wyjscie = new MenuItem("Zamknij");
 		MenuItem addNew = new MenuItem("Nowe okno");
+		MenuItem showAll = new MenuItem("Poka¿ wszystkie");
+		MenuItem closeAll = new MenuItem("Zamknij wszystkie okna");
+		MenuItem wyjscie = new MenuItem("Zamknij program");
 		
 		//Dodawanie do menu
-		menu.add(wyjscie);
 		menu.add(addNew);
+		menu.add(showAll);
+		menu.addSeparator();
+		menu.add(closeAll);
+		menu.addSeparator();
+		menu.add(wyjscie);
 		
 		//Eventy
-		wyjscie.addActionListener((e)->zabij(0));
 		addNew.addActionListener((e)->createWindow() );
+		showAll.addActionListener((e)->{for(Okno o : okna){o.getJFrame().requestFocus();} } );
+		closeAll.addActionListener((e)->destroyAllWindows() );
+		wyjscie.addActionListener((e)->zabij(0));
 		//Ustawienie menusa
 		tIc.setPopupMenu(menu);
 		tIc.setToolTip("Okno ");
 	}
 	
 	public void zabij(int err){
-		Okno[] oknaToDestroy = okna.toArray(new Okno[okna.size()]);
-		for(Okno o : oknaToDestroy) destroyWindow(o);
-		oknaToDestroy = null;
-		
+		destroyAllWindows();
 		SystemTray.getSystemTray().remove(tIc);
 		System.exit(err);
 	}
 	
+	public void destroyAllWindows(){
+		Okno[] oknaToDestroy = okna.toArray(new Okno[okna.size()]);
+		for(Okno o : oknaToDestroy) destroyWindow(o);
+		oknaToDestroy = null;
+	}
 	
 	public void destroyWindow(Okno ok){
 		ok._destroy();
