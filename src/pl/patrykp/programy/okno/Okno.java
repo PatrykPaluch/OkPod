@@ -1,35 +1,19 @@
 package pl.patrykp.programy.okno;
 
-import java.awt.AWTError;
-import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
-import java.awt.SystemTray;
-import java.awt.TrayIcon;
 import java.awt.Window;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.function.Function;
 
-import javax.imageio.ImageIO;
-import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -39,10 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.text.Keymap;
 
 import pl.patrykp.programy.okno.utils.Utils;
 import pl.patrykp.programy.okno.utils.XYMenuAcceptEvent;
@@ -51,6 +32,7 @@ import pl.patrykp.programy.okno.utils.XYMenuAcceptListener;
 public class Okno implements MouseMotionListener, MouseListener {
 	
 	private Image aktImage;//TODO dodac obsloge gifow
+	//TODO zwiekszanie okna z oryginalu obrazu
 	private JPopupMenu popupMenu;
 	private JFrame o;
 	private MouseDelta md = new MouseDelta();
@@ -74,7 +56,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 		o.setAlwaysOnTop(true);
 		o.setSize(100, 100);
 		o.setName("Okno");
-		o.getContentPane().setBackground(new Color(0,0,0,0));
+		o.getContentPane().setBackground(new Color(0,0,0,0));//TODO wind 10 nie dziala
 		o.setVisible(true);
 		
 		

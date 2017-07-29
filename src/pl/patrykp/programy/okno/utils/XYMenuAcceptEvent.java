@@ -1,7 +1,5 @@
 package pl.patrykp.programy.okno.utils;
 
-import java.awt.event.ActionEvent;
-
 public class XYMenuAcceptEvent{
 	private Object source;
 	private int outX;

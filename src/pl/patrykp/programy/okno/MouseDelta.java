@@ -4,8 +4,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JComponent;
-
 public class MouseDelta {
 	
 	private int x, y, dx, dy;

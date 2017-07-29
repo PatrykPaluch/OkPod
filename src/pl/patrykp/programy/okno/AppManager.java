@@ -1,20 +1,13 @@
 package pl.patrykp.programy.okno;
 
 import java.awt.AWTException;
-import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import javax.imageio.ImageIO;
-import javax.rmi.CORBA.Util;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import pl.patrykp.programy.okno.utils.Utils;
