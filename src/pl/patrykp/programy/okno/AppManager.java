@@ -17,16 +17,21 @@ public class AppManager {
 	private static final AppManager instance; 
 	
 	private ArrayList<Okno> okna = new ArrayList<Okno>();
-	
+	private boolean started = false;
 	
 	private TrayIcon tIc;
 	
 	static {
 		instance = new AppManager();
-		instance.init();
 	}
 	
 	private AppManager(){}
+	
+	public void start() {
+		if(started) return;
+		started = true;
+		init();
+	}
 	
 	private void init(){
 		initTray();
@@ -115,6 +120,9 @@ public class AppManager {
 	
 	public static AppManager getInstance(){
 		return instance;
+	}
+	public boolean started() {
+		return started;
 	}
 	
 	
