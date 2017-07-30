@@ -56,7 +56,8 @@ public class Okno implements MouseMotionListener, MouseListener {
 		o.setAlwaysOnTop(true);
 		o.setSize(100, 100);
 		o.setName("Okno");
-		o.getContentPane().setBackground(new Color(0,0,0,0));//TODO wind 10 nie dziala
+		o.setBackground(new Color(0,0,0,0));
+		o.getContentPane().setBackground(new Color(0,0,0,0));
 		o.setVisible(true);
 		
 		

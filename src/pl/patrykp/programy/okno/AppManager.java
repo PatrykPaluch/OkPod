@@ -112,10 +112,11 @@ public class AppManager {
 		okna.remove(ok);
 	}
 	
-	public void createWindow(){
+	public Okno createWindow(){
 		Okno ok = new Okno();
 		ok.start();
 		okna.add(ok);
+		return ok;
 	}
 	
 	public static AppManager getInstance(){
