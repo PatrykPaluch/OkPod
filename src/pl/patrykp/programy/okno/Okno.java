@@ -107,11 +107,13 @@ public class Okno implements MouseMotionListener, MouseListener {
 		close.addActionListener((e)->stop());
 		
 		//TODO: przekazywanie parametru o rozmiarze
-		resizeVal.addActionListener((e)->showXYMenu(
+		resizeVal.addActionListener( (e)->showXYMenu(
+				(int)o.getSize().getWidth(), (int)o.getSize().getHeight(),
 				(ev)->resize( ev.getOutX(), ev.getOutY() )
 				) );
 		//TODO: przekazywanie parametru o pozycji
-		setPos.addActionListener( (e)->showXYMenu(
+		setPos.addActionListener((e)->showXYMenu(
+				o.getLocation().x, o.getLocation().y, 
 				(ev)->o.setLocation( ev.getOutX(), ev.getOutY() )
 				) );
 		
@@ -124,7 +126,12 @@ public class Okno implements MouseMotionListener, MouseListener {
 		this.popupMenu = menu;
 	}
 	
-	void showXYMenu(XYMenuAcceptListener okButtonPressAction){
+	/**
+	 * @param f - first window variable (x)
+	 * @param s - second window variable (y)
+	 * @param okButtonPressAction - on accept button press event
+	 */
+	void showXYMenu(int f, int s, XYMenuAcceptListener okButtonPressAction){
 		JDialog d = new JDialog();
 		d.getContentPane().setLayout(new GridLayout(3, 2));
 		JLabel xL = new JLabel("X:");
@@ -142,8 +149,8 @@ public class Okno implements MouseMotionListener, MouseListener {
 		JButton cancelB = new JButton("Anuluj");
 	
 		
-		x.setValue(o.getSize().width);
-		y.setValue(o.getSize().height);
+		x.setValue(f);
+		y.setValue(s);
 		
 		x.setColumns(4);
 		y.setColumns(4);
