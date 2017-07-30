@@ -24,6 +24,8 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import pl.patrykp.programy.okno.utils.Utils;
 import pl.patrykp.programy.okno.utils.XYMenuAcceptEvent;

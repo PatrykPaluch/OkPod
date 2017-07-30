@@ -9,6 +9,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
+import javax.swing.LookAndFeel;
+import javax.swing.UIManager;
 
 import pl.patrykp.programy.okno.utils.Utils;
 
@@ -18,7 +20,6 @@ public class AppManager {
 	
 	private ArrayList<Okno> okna = new ArrayList<Okno>();
 	private boolean started = false;
-	
 	private TrayIcon tIc;
 	
 	static {
@@ -34,6 +35,10 @@ public class AppManager {
 	}
 	
 	private void init(){
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception er) {}
+		
 		initTray();
 	}
 	
@@ -125,6 +130,24 @@ public class AppManager {
 	public boolean started() {
 		return started;
 	}
-	
+	public boolean setCrossPlatformLookAndFeel() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			return true;
+		}catch(Exception er) {
+			return false;
+		}
+	}
+	public boolean setSystemLookAndFeel() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			return true;
+		}catch(Exception er) {
+			return false;
+		}
+	}
+	public LookAndFeel getLookAndFeel() {
+		return UIManager.getLookAndFeel();
+	}
 	
 }
