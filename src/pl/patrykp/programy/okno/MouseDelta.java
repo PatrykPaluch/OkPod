@@ -31,7 +31,7 @@ public class MouseDelta {
 		this.dy = y-this.y;
 	}
 	
-	public void updateMove(MouseEvent e){
+	public void updateMoveOnScreen(MouseEvent e){
 		updateMove(e.getXOnScreen(), e.getYOnScreen());
 	}
 	

@@ -1,10 +1,15 @@
+// 100 lat Rati :P
 package pl.patrykp.programy.okno;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Stroke;
 import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -24,8 +29,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import pl.patrykp.programy.okno.utils.Utils;
 import pl.patrykp.programy.okno.utils.XYMenuAcceptEvent;
@@ -38,7 +41,10 @@ public class Okno implements MouseMotionListener, MouseListener {
 	private JPopupMenu popupMenu;
 	private JFrame o;
 	private MouseDelta md = new MouseDelta();
+	private MouseDelta resMd = new MouseDelta();
 	private JLabel tlo;
+	private boolean resizeMode = false;
+	private int resizeModeBorderSize = 30;//%
 	
 	public JFrame getJFrame(){ return o; }
 	
@@ -46,7 +52,15 @@ public class Okno implements MouseMotionListener, MouseListener {
 		
 		initAppMenu();
 		
-		o = new JFrame();
+		o = new JFrame() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void paint(Graphics g) {
+				super.paint(g);
+				paintOnJFame(g);
+			}
+		};
 		o.setType(Window.Type.UTILITY);
 		o.addWindowListener(new WindowAdapter() {
 			@Override
@@ -76,7 +90,19 @@ public class Okno implements MouseMotionListener, MouseListener {
 		o.setVisible(true);
 	}
 	
-	
+	public void paintOnJFame(Graphics gD) {
+		if(resizeMode) {
+			Graphics2D g = (Graphics2D) gD;
+			Stroke old = g.getStroke();
+			g.setStroke(new BasicStroke(resizeModeBorderSize));
+			g.setColor(Color.WHITE);
+			g.drawRect(0, 0, o.getContentPane().getWidth(), o.getContentPane().getHeight());
+			g.setStroke(new BasicStroke(resizeModeBorderSize/2));
+			g.setColor(Color.BLACK);
+			g.drawRect(0, 0, o.getContentPane().getWidth(), o.getContentPane().getHeight());
+			g.setStroke(old);
+		}
+	}
 	
 	
 	private void initAppMenu(){
@@ -108,12 +134,12 @@ public class Okno implements MouseMotionListener, MouseListener {
 		//Eventy
 		close.addActionListener((e)->stop());
 		
-		//TODO: przekazywanie parametru o rozmiarze
+		
 		resizeVal.addActionListener( (e)->showXYMenu(
 				(int)o.getSize().getWidth(), (int)o.getSize().getHeight(),
 				(ev)->resize( ev.getOutX(), ev.getOutY() )
 				) );
-		//TODO: przekazywanie parametru o pozycji
+		
 		setPos.addActionListener((e)->showXYMenu(
 				o.getLocation().x, o.getLocation().y, 
 				(ev)->o.setLocation( ev.getOutX(), ev.getOutY() )
@@ -121,6 +147,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 		
 		open.addActionListener( (e)->showOpenFileDialog() );
 		
+		resize.addActionListener( (e)-> setResizeMode(true) ); 
 		//TODO eventy
 		
 		
@@ -219,10 +246,25 @@ public class Okno implements MouseMotionListener, MouseListener {
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
+		if(resizeMode && SwingUtilities.isLeftMouseButton(e)) {
+			//TODO wydzielic do klasy
+			/*
+			
+			if(e.getX() > o.getContentPane().getWidth()-resizeModeBorderSize) {
+				resMd.updateMoveOnScreen(e);
+				o.setSize(o.getSize().width+resMd.getX(), o.getSize().height);
+				System.out.println(resMd.getX());
+			}
+			else if(e.getX()<resizeModeBorderSize) {
+				
+			}
+			return;*/
+		}
 		if(SwingUtilities.isLeftMouseButton(e)){
-			md.updateMove(e);
+			md.updateMoveOnScreen(e);
 			md.setPosOnScrean(o);
 		}
+		
 	}
 
 	@Override
@@ -232,6 +274,10 @@ public class Okno implements MouseMotionListener, MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if(SwingUtilities.isRightMouseButton(e)) {
+			if (resizeMode) {
+				setResizeMode(false);
+				return;
+			}
 			popupMenu.show((Component)e.getSource(), e.getX(), e.getY());
 		}
 	}
@@ -246,11 +292,17 @@ public class Okno implements MouseMotionListener, MouseListener {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		if(SwingUtilities.isLeftMouseButton(e)) md.click(e);
+		if(SwingUtilities.isLeftMouseButton(e)) {
+			md.click(e);
+			//TODO klasa do tego
+			//if(resizeMode) resMd.click(e);
+		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		md.reset();
+		//resMd.reset();
 	}
 	
 	@Override
@@ -258,4 +310,21 @@ public class Okno implements MouseMotionListener, MouseListener {
 		return this == obj;
 	}
 	
+	
+	public void setResizeMode(boolean b) {
+		if(this.resizeMode == b) return;
+		this.resizeMode = b;
+		o.repaint();
+	}
+	public boolean getResizeMode() {
+		return this.resizeMode;
+	}
+	public void setResizeModeBorderSize(int size) {
+		if(size<10 || size>Math.min(o.getContentPane().getWidth(), o.getContentPane().getHeight())/2-2 ) throw new IllegalArgumentException("Size must be >10 and <window size/2-2");
+		this.resizeModeBorderSize = size;
+		if(this.resizeMode) o.repaint();
+	}
+	public int getResizeModeBorderSize() {
+		return this.resizeModeBorderSize;
+	}
 }
