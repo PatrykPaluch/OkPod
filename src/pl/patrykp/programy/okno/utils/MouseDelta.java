@@ -1,4 +1,4 @@
-package pl.patrykp.programy.okno;
+package pl.patrykp.programy.okno.utils;
 
 import java.awt.Component;
 import java.awt.Dimension;

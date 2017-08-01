@@ -5,12 +5,16 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Stroke;
 import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -19,6 +23,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.text.NumberFormat;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -27,24 +32,30 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.ComponentInputMapUIResource;
 
+import com.wordpress.tipsforjava.swing.ComponentResizer;
+
+import pl.patrykp.programy.okno.utils.MouseDelta;
 import pl.patrykp.programy.okno.utils.Utils;
+import pl.patrykp.programy.okno.utils.WindowResizer;
 import pl.patrykp.programy.okno.utils.XYMenuAcceptEvent;
 import pl.patrykp.programy.okno.utils.XYMenuAcceptListener;
 
-public class Okno implements MouseMotionListener, MouseListener {
+public class Okno implements MouseMotionListener, MouseListener, ComponentListener {
 	
 	private Image aktImage;//TODO dodac obsloge gifow
 	//TODO zwiekszanie okna z oryginalu obrazu
 	private JPopupMenu popupMenu;
 	private JFrame o;
 	private MouseDelta md = new MouseDelta();
-	private MouseDelta resMd = new MouseDelta();
+	//private WindowResizer windRes = new WindowResizer(o);
 	private JLabel tlo;
+
 	private boolean resizeMode = false;
-	private int resizeModeBorderSize = 30;//%
 	
 	public JFrame getJFrame(){ return o; }
 	
@@ -60,6 +71,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 				super.paint(g);
 				paintOnJFame(g);
 			}
+			
 		};
 		o.setType(Window.Type.UTILITY);
 		o.addWindowListener(new WindowAdapter() {
@@ -72,13 +84,17 @@ public class Okno implements MouseMotionListener, MouseListener {
 		o.setAlwaysOnTop(true);
 		o.setSize(100, 100);
 		o.setName("Okno");
+		
 		o.setBackground(new Color(0,0,0,0));
 		o.getContentPane().setBackground(new Color(0,0,0,0));
 		o.setVisible(true);
 		
+		//o.setContentPane(null);
 		
-		o.getContentPane().addMouseMotionListener(this);
-		o.getContentPane().addMouseListener(this);
+		o.addMouseMotionListener(this);
+		o.addMouseListener(this);
+		o.addComponentListener(this);
+		
 		
 		aktImage = Utils.defaultTexture.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
 		tlo = new JLabel(new ImageIcon(aktImage));
@@ -86,18 +102,21 @@ public class Okno implements MouseMotionListener, MouseListener {
 		o.getContentPane().add(tlo, BorderLayout.CENTER);
 		
 		
-		o.pack();
+		//o.pack();
 		o.setVisible(true);
+		
+		
 	}
 	
 	public void paintOnJFame(Graphics gD) {
+		//gD.fillRect(0, 0, o.getWidth(), o.getHeight());
 		if(resizeMode) {
 			Graphics2D g = (Graphics2D) gD;
 			Stroke old = g.getStroke();
-			g.setStroke(new BasicStroke(resizeModeBorderSize));
+			g.setStroke(new BasicStroke(10));
 			g.setColor(Color.WHITE);
 			g.drawRect(0, 0, o.getContentPane().getWidth(), o.getContentPane().getHeight());
-			g.setStroke(new BasicStroke(resizeModeBorderSize/2));
+			g.setStroke(new BasicStroke(5));
 			g.setColor(Color.BLACK);
 			g.drawRect(0, 0, o.getContentPane().getWidth(), o.getContentPane().getHeight());
 			g.setStroke(old);
@@ -137,7 +156,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 		
 		resizeVal.addActionListener( (e)->showXYMenu(
 				(int)o.getSize().getWidth(), (int)o.getSize().getHeight(),
-				(ev)->resize( ev.getOutX(), ev.getOutY() )
+				(ev)->o.setSize( ev.getOutX(), ev.getOutY() )
 				) );
 		
 		setPos.addActionListener((e)->showXYMenu(
@@ -221,18 +240,13 @@ public class Okno implements MouseMotionListener, MouseListener {
 		}
 	}
 	
-	public void resize(int x, int y){
-		o.setSize(x,y);
-		aktImage = aktImage.getScaledInstance(x, y, Image.SCALE_SMOOTH);
-		tlo.setIcon(new ImageIcon(aktImage));	
-	}
-	
 	public void stop(){
 		AppManager.getInstance().destroyWindow(this);
 	}
 	
 	void _destroy(){
 		if(o==null) return;
+		AppManager.getInstance().cr.deregisterComponent(o);
 		o.dispose();
 		o = null;
 		md = null;
@@ -246,21 +260,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		if(resizeMode && SwingUtilities.isLeftMouseButton(e)) {
-			//TODO wydzielic do klasy
-			/*
-			
-			if(e.getX() > o.getContentPane().getWidth()-resizeModeBorderSize) {
-				resMd.updateMoveOnScreen(e);
-				o.setSize(o.getSize().width+resMd.getX(), o.getSize().height);
-				System.out.println(resMd.getX());
-			}
-			else if(e.getX()<resizeModeBorderSize) {
-				
-			}
-			return;*/
-		}
-		if(SwingUtilities.isLeftMouseButton(e)){
+		if( !resizeMode && SwingUtilities.isLeftMouseButton(e)){
 			md.updateMoveOnScreen(e);
 			md.setPosOnScrean(o);
 		}
@@ -269,6 +269,7 @@ public class Okno implements MouseMotionListener, MouseListener {
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		
 	}
 
 	@Override
@@ -310,21 +311,44 @@ public class Okno implements MouseMotionListener, MouseListener {
 		return this == obj;
 	}
 	
-	
 	public void setResizeMode(boolean b) {
 		if(this.resizeMode == b) return;
 		this.resizeMode = b;
+		if(resizeMode) {
+			AppManager.getInstance().cr.registerComponent(o);
+		}else {
+			AppManager.getInstance().cr.deregisterComponent(o);
+		}
 		o.repaint();
 	}
 	public boolean getResizeMode() {
 		return this.resizeMode;
 	}
-	public void setResizeModeBorderSize(int size) {
-		if(size<10 || size>Math.min(o.getContentPane().getWidth(), o.getContentPane().getHeight())/2-2 ) throw new IllegalArgumentException("Size must be >10 and <window size/2-2");
-		this.resizeModeBorderSize = size;
-		if(this.resizeMode) o.repaint();
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
-	public int getResizeModeBorderSize() {
-		return this.resizeModeBorderSize;
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
+
+	@Override
+	public void componentResized(ComponentEvent e) {
+		int x = o.getSize().width;
+		int y = o.getSize().height;
+		aktImage = aktImage.getScaledInstance(x, y, Image.SCALE_SMOOTH);
+		tlo.setIcon(new ImageIcon(aktImage));
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		
+	}
+	
+	
 }

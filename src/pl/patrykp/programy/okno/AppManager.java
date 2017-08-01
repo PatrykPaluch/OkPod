@@ -1,6 +1,7 @@
 package pl.patrykp.programy.okno;
 
 import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
@@ -12,6 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
+import com.wordpress.tipsforjava.swing.ComponentResizer;
+
 import pl.patrykp.programy.okno.utils.Utils;
 
 public class AppManager {
@@ -21,6 +24,8 @@ public class AppManager {
 	private ArrayList<Okno> okna = new ArrayList<Okno>();
 	private boolean started = false;
 	private TrayIcon tIc;
+	
+	public ComponentResizer cr;
 	
 	static {
 		instance = new AppManager();
@@ -38,6 +43,11 @@ public class AppManager {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception er) {}
+		
+		cr = new ComponentResizer();
+		cr.setSnapSize(new Dimension(10, 10));
+		cr.setMaximumSize(new Dimension(30, 30));
+		cr.setMaximumSize(new Dimension(1000, 1000));
 		
 		initTray();
 	}
